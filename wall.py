@@ -25,7 +25,7 @@ class ParkingSlot():
 	def __create_slot(self):
 		self.walls.add(Wall(self.x, self.y, self.slot_x - self.slot_width / 2, self.wall_size))
 		# Additional wall for spare square between first vertical and horizontal line 
-		self.walls.add(Wall(self.slot_x - self.slot_width / 2, self.y, self.wall_size, self.wall_size)
+		self.walls.add(Wall(self.slot_x - self.slot_width / 2, self.y, self.wall_size, self.wall_size))
 		self.walls.add(Wall(self.slot_x - self.slot_width / 2, self.y - self.slot_height, self.wall_size, self.slot_height))
 		self.walls.add(Wall(self.slot_x - self.slot_width / 2, self.y - self.slot_height, self.slot_width, self.wall_size))
 		self.walls.add(Wall(self.slot_x + self.slot_width / 2, self.y - self.slot_height, self.wall_size, self.slot_height))
