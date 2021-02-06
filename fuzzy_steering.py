@@ -84,10 +84,13 @@ class FuzzySteering:
     return ctrl.ControlSystemSimulation(steering_ctrl)
 
   def get_steering(self, xa_input, ya_input, angle_input):
-
     xa_input = round(xa_input, 2)
     ya_input = round(ya_input, 2)
     angle_input = round(angle_input, 2)
+
+    print('xa ',xa_input)
+    print('ya ',ya_input)
+    print('angle ',-angle_input)
 
     self.steering_ctrl.input['xa'] = xa_input
     self.steering_ctrl.input['ya'] = ya_input
