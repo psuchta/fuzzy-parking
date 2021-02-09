@@ -52,6 +52,7 @@ class Car(pygame.sprite.Sprite):
 
   def rotate(self):
     c = self.rect.center
+    # Usage of rotozoom giving better rotation quality than rotate method
     self.image = pygame.transform.rotozoom(self.original, self.angle, 1)
     self.rect = self.image.get_rect(center = c)
     self.mask = pygame.mask.from_surface(self.image)
@@ -65,12 +66,13 @@ class Car(pygame.sprite.Sprite):
   
   # Multiply change vector by delta time between each frame, 32 is one meter in real world  
   def scale_position_change(self, point, dt):
-    return point * dt * 32
+    return point * dt * self.WIDTH / 2
 
   def check_collision(self,x_change, y_change, dt):
 
     blocking_walls = pygame.sprite.spritecollide(self, self.walls, False, pygame.sprite.collide_mask)
-    if blocking_walls:
+    if len(blocking_walls) > 1:
+
       # print('first collide', len(blocking_walls))
       # self.position.x += self.scale_position_change(-copysign(10, x_change), dt)
       # self.position.y -= self.scale_position_change(-copysign(10, y_change), dt)
@@ -78,6 +80,17 @@ class Car(pygame.sprite.Sprite):
       self.velocity.x = 0
 
 class ControllerCar(Car):
+  def __init__(self, pos_x, pos_y):
+    Car.__init__(self, pos_x, pos_y)
+    self.max_steering = 25
+    self.key_mapping = {
+      'up': pygame.K_UP,
+      'down': pygame.K_DOWN,
+      'brake': pygame.K_SPACE,
+      'right': pygame.K_RIGHT,
+      'left': pygame.K_LEFT
+    }
+
   def update(self, dt):
     self.detect_steering(dt)
     super().update(dt)
@@ -85,17 +98,17 @@ class ControllerCar(Car):
   def detect_steering(self, dt):
     pressed = pygame.key.get_pressed()
 
-    if pressed[pygame.K_UP]:
+    if pressed[self.key_mapping['up']]:
       if self.velocity.x < 0:
         self.acceleration = self.brake_deceleration
       else:
         self.acceleration += 1 * dt
-    elif pressed[pygame.K_DOWN]:
+    elif pressed[self.key_mapping['down']]:
       if self.velocity.x > 0:
         self.acceleration = -self.brake_deceleration
       else:
         self.acceleration -= 1 * dt
-    elif pressed[pygame.K_SPACE]:
+    elif pressed[self.key_mapping['brake']]:
       if abs(self.velocity.x) > dt * self.brake_deceleration:
         self.acceleration = -copysign(self.brake_deceleration, self.velocity.x)
       else:
@@ -109,13 +122,13 @@ class ControllerCar(Car):
     self.acceleration = max(-self.max_acceleration, min(self.acceleration, self.max_acceleration))
 
 
-    if pressed[pygame.K_RIGHT]:
+    if pressed[self.key_mapping['right']]:
       if self.steering > 0:
         steering_add = 90
       else:
         steering_add = 30
       self.steering -= steering_add * dt
-    elif pressed[pygame.K_LEFT]:
+    elif pressed[self.key_mapping['left']]:
       if self.steering < 0:
         steering_add = 90
       else:
@@ -131,8 +144,12 @@ class AutonomousCar(Car):
     self.velocity = pygame.Vector2(-5.0, 0.0)
     self.fuzzy_steering = FuzzySteering()
 
-  def autonomouse_steering(self, dt, parking_width, parking_height):
-    xa = self.position.x / parking_width
+  def autonomouse_steering(self, dt, parking_slot):
+    parking_x_beginning = parking_slot.slot_x - parking_slot.slot_width/2
+    parking_width = parking_x_beginning + parking_slot.slot_width
+    parking_height = parking_slot.slot_height
+
+    xa = (self.position.x - parking_x_beginning) / (parking_slot.slot_width)
     xy = self.position.y / parking_height
     self.update(dt)
     self.steering = self.fuzzy_steering.get_steering(xa , xy, self.angle)
