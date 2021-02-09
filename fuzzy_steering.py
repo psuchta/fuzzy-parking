@@ -85,6 +85,10 @@ class FuzzySteering:
 
   def get_steering(self, xa_input, ya_input, angle_input):
 
+    print('xa ', xa_input)
+    print('ya ', ya_input)
+    print('angle ', -angle_input)
+
     xa_input = round(xa_input, 2)
     ya_input = round(ya_input, 2)
     angle_input = round(angle_input, 2)
